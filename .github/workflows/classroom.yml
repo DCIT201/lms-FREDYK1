@@ -1,7 +1,9 @@
 name: Autograding Tests
-'on':
-- push
-- repository_dispatch
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
 permissions:
   checks: write
   actions: read
@@ -11,20 +13,21 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'github-classroom[bot]'
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: BookTest
-      id: booktest
-      uses: classroom-resources/autograding-command-grader@v1
-      with:
-        test-name: BookTest
-        setup-command: ''
-        command: gradle test
-        timeout: 10
-        max-score: 20
-    - name: Autograding Reporter
-      uses: classroom-resources/autograding-grading-reporter@v1
-      env:
-        BOOKTEST_RESULTS: "${{steps.booktest.outputs.result}}"
-      with:
-        runners: booktest
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      - name: BookTest
+        id: booktest
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: BookTest
+          setup-command: ''
+          command: ./gradlew test
+          timeout: 10
+          max-score: 20
+      - name: Autograding Reporter
+        uses: education/autograding@v1
